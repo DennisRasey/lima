@@ -8,9 +8,14 @@ fi
 # This script does not work unless systemd is available
 command -v systemctl >/dev/null 2>&1 || exit 0
 
-if [ ! -x /usr/local/bin/nerdctl ]; then
-	tar Cxzf /usr/local "${LIMA_CIDATA_MNT}"/nerdctl-full.tgz
+NERDCTL_LATEST_VERSION=$(curl -sk https://api.github.com/repos/containerd/nerdctl/releases/latest | grep tag_name | awk '{print $2}' | tr -d '",v')
+test -z "$NERDCTL_LATEST_VERSION" && { echo 'cannot find nerdctl latest version' ; exit 1 ; }
 
+NERDCTL_LOCAL_VERSION=$(nerdctl -v | awk '{print $3}')
+test -z "$NERDCTL_LOCAL_VERSION" && { echo 'cannot find nerdctl local version' ; exit 1 ; }
+
+
+if [ ! -x /usr/local/bin/nerdctl ] || [ "$NERDCTL_LATEST_VERSION" != "$NERDCTL_LOCAL_VERSION" ] ; then	tar Cxzf /usr/local "${LIMA_CIDATA_MNT}"/nerdctl-full.tgz
 	mkdir -p /etc/bash_completion.d
 	nerdctl completion bash >/etc/bash_completion.d/nerdctl
 	# TODO: enable zsh completion too
