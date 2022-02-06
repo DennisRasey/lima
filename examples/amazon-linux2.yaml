@@ -1,0 +1,27 @@
+# This example requires Lima v0.7.0 or later.
+
+images:
+- location: "https://cdn.amazonlinux.com/os-images/2.0.20211223.0/kvm/amzn2-kvm-2.0.20211223.0-x86_64.xfs.gpt.qcow2"
+  arch: "x86_64"
+  digest: "sha512:8a3191a9cfb08131970819a0863218d4780fa7b8050591e29bad761260a00c6ab13e5f986131cb620c2ddc77fa64e1c9b4d0a23dea653a605b0c5136fc3fe621"
+mounts:
+- location: "~"
+- location: "/tmp/lima"
+  writable: true
+firmware:
+  legacyBIOS: true
+containerd:
+  system: false
+  user: false
+
+provision:
+  # `system` is executed with the root privilege
+  - mode: system
+    script: |
+      #!/bin/bash
+      set -eux -o pipefail
+      yum makecache
+      amazon-linux-extras install epel -y
+      yum install sshfs -y
+      #sed -i '/user_allow_other/s/^# //' /etc/fuse.conf
+
